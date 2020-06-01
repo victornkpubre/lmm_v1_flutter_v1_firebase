@@ -222,13 +222,12 @@ class FirebaseRealtimeDatabaseManager{
 
     List list = [];
 
-    await table_count.once().then((count_value) async{
-      int count = count_value.value;
-      for (var i = 0; i < count; i++) {
-        DataSnapshot uid = await index_table.child("$i").once();
-        list.add(uid.value["uid"]);
-      }
-    });
+    DataSnapshot count_value = await table_count.once();
+    int count = count_value.value;
+    for (var i = 0; i < count; i++) {
+      DataSnapshot uid = await index_table.child("$i").once();
+      list.add(uid.value["uid"]);
+    }  
 
     return json.encode(list);
   }
