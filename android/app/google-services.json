@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "225318326744",
+    "firebase_url": "https://lagosmatchmaker-49909.firebaseio.com",
+    "project_id": "lagosmatchmaker-49909",
+    "storage_bucket": "lagosmatchmaker-49909.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:225318326744:android:8d6b2a0887792281a962ad",
+        "android_client_info": {
+          "package_name": "com.DHive.lagos_match_maker"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "225318326744-0g1gcl3u5o4acu8fuqtihtht5t2vd7td.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.DHive.lagos_match_maker",
+            "certificate_hash": "5f43a12720aef5d79589ec130733d3bbd629bcbc"
+          }
+        },
+        {
+          "client_id": "225318326744-7d4rnre0dvgfi2g5hi9enr9qbsdmmgm5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoaRG8DD7VIyadbfEdgnm11qnF-PvbmGg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "225318326744-7d4rnre0dvgfi2g5hi9enr9qbsdmmgm5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
