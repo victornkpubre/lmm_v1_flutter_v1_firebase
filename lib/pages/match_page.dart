@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:lagos_match_maker/apis/colors.dart';
 import 'package:lagos_match_maker/apis/fcm_manager.dart';
 import 'package:lagos_match_maker/apis/generic_database_manager.dart';
@@ -27,6 +28,7 @@ class MatchPage extends StatefulWidget {
 }
 
 class _MatchPageState extends State<MatchPage> {
+  int trial_cnt = 0;
   bool trial = false;
   int lastUserIndex = 0;
   int currentIndex = 0;
@@ -37,11 +39,21 @@ class _MatchPageState extends State<MatchPage> {
   bool rejecting = false;
   bool accepting = false;
   bool loading = false;
+  bool instructing = false;
   bool nomorematches = false;
   FirebaseMessaging _firebaseMessaging;
 
   @override
   void initState() {
+
+    if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+      //here the sublist is already build
+        if(widget.user == null){
+          startInstructions();
+        }
+      });
+    }
 
     if(widget.user == null){
       trial = true;
@@ -65,6 +77,19 @@ class _MatchPageState extends State<MatchPage> {
     }
     
     super.initState();
+  }
+
+  startInstructions(){
+
+    setState(() {
+      instructing = true;
+    });
+
+    Future.delayed(Duration(seconds: 12), (){
+      setState(() {
+        instructing = false;
+      });
+    });
   }
 
   loadInitUsersTrial() async {
@@ -374,6 +399,57 @@ class _MatchPageState extends State<MatchPage> {
               Center(child: CircularProgressIndicator(backgroundColor: LmmColors.lmmGold  )):
               Container(),
               
+
+              instructing?
+              Container(
+                color: Color.fromRGBO(180, 180, 180, 0.6),
+                width: size.width,
+                height: size.height,
+                child: Column(
+                  
+                  children: [
+                    Divider(color: Colors.transparent,),
+                    Text("Loading Settings...", style: TextStyle(fontFamily: "Times New Roman", fontSize: 20),),
+                  ],
+                )
+              ):
+              Container(),
+
+
+              instructing?
+              Positioned(
+                left: size.width*0.02,
+                top: size.height*0.20,
+                child: Container(
+                  width: size.width*0.45,
+                  height: size.width*0.45,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/swipe_left.png'),
+                      fit: BoxFit.fitHeight
+                    )
+                  ),
+                ),
+              ):
+              Container(),
+
+              instructing?
+              Positioned(
+                right: size.width*0.02,
+                bottom: size.height*0.20,
+                child: Container(
+                  width: size.width*0.45,
+                  height: size.width*0.45,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/swipe_right.png'),
+                      fit: BoxFit.fitHeight
+                    ),
+                  ),
+                ),
+              ):
+              Container(),
+              
             ],
           )
           
@@ -391,15 +467,18 @@ class _MatchPageState extends State<MatchPage> {
     for (var i = index; i < index + cnt; i++) {
       String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", user_ids[i]);
       Map<String, dynamic> tempUser = json.decode(jsonStr);
-      lastUserIndex = i;
-      String attribute = tempUser[attr];
-      if(attribute.compareTo(value)==0){
-        String uid = tempUser["uid"];
-        //if uid is among viewedUsers do not add unless user is premium
-        bool viewed = await LmmSharedPreferenceManager().aleardyViewedUsers(uid);
-        if(!viewed){
-          tempUsers.add(User.fromJson(tempUser));
-          print("$i");
+
+      if(tempUser != null){
+        lastUserIndex = i;
+        String attribute = tempUser[attr];
+        if(attribute.compareTo(value)==0){
+          String uid = tempUser["uid"];
+          //if uid is among viewedUsers do not add unless user is premium
+          bool viewed = await LmmSharedPreferenceManager().aleardyViewedUsers(uid);
+          if(!viewed){
+            tempUsers.add(User.fromJson(tempUser));
+            print("$i");
+          }
         }
       } 
     }
@@ -415,16 +494,19 @@ class _MatchPageState extends State<MatchPage> {
     for (var i = index; i < index + cnt + 1; i++) {
       String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", user_ids[i]);
       Map<String, dynamic> tempUser = json.decode(jsonStr);
-      lastUserIndex = i;
-      // String attribute = tempUser[attr];
-      //if(attribute.compareTo(value)==0){
-        String uid = tempUser["uid"];
-        //if uid is among viewedUsers do not add unless user is premium
-        bool viewed = await LmmSharedPreferenceManager().aleardyViewedUsers(uid);
-        if(!viewed){
-          tempUsers.add(User.fromJson(tempUser));
-        }
-      //} 
+      if(tempUser != null){
+        lastUserIndex = i;
+        // String attribute = tempUser[attr];
+        //if(attribute.compareTo(value)==0){
+          String uid = tempUser["uid"];
+          //if uid is among viewedUsers do not add unless user is premium
+          bool viewed = await LmmSharedPreferenceManager().aleardyViewedUsers(uid);
+          if(!viewed){
+            tempUsers.add(User.fromJson(tempUser));
+          }
+        //} 
+      }
+
     }
 
     return tempUsers;
@@ -433,6 +515,7 @@ class _MatchPageState extends State<MatchPage> {
 
   rejectUser() async {
     if(!trial){
+
       if(await LmmSharedPreferenceManager().aleardyViewedUsers(currentUser.uid)){
         //addViewedUser
         LmmSharedPreferenceManager().addToViewedUser(currentUser.uid);
@@ -484,19 +567,27 @@ class _MatchPageState extends State<MatchPage> {
     });
 
     if(trial){
-      showDialog(
-        context: context,
-        builder: (context){
-          return Center(
-            child: TrialDialog(userInitiated: false),
-          );
-        }
-      );
+      if(trial_cnt > 2){
+        showDialog(
+          context: context,
+          builder: (context){
+            return Center(
+              child: TrialDialog(userInitiated: false),
+            );
+          }
+        );
+        trial_cnt = 0;
+      }
+      else{
+        trial_cnt++;
+      }
     }
 
     if(nomorematches == true){
 
-      //Do Nothing
+      setState(() {
+        nomorematches = true;
+      });
 
     }else{
       if(currentIndex < users.length - 1){
@@ -522,7 +613,7 @@ class _MatchPageState extends State<MatchPage> {
           //showNoMoreMatchPage()
           if(widget.user.membership.compareTo("premium")==0){
             setState(() {
-              currentIndex = 0;
+              nomorematches = true;
             });
           }
           else{

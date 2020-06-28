@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lagos_match_maker/apis/colors.dart';
-import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/chat_page.dart';
@@ -130,7 +129,11 @@ class _SuccessfulDialogState extends State<SuccessfulDialog> {
     Navigator.of(context).pop();
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: user, messages: [],)),
+      MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: user, messages: [], callBackFunction: (list ) { 
+        setState(() {
+          
+        });
+      },)),
     );
   }
   

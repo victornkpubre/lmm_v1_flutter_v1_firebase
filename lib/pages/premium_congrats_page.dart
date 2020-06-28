@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/match_page.dart';
-import 'package:lagos_match_maker/widgets/lmm_appbar.dart';
 import 'package:lagos_match_maker/widgets/lmm_bottombar.dart';
 
 

@@ -1,7 +1,5 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
-import 'package:lagos_match_maker/apis/fcm_manager.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/dialogs/matchPage/trialdialog.dart';
 import 'package:lagos_match_maker/models/index.dart';
@@ -30,7 +28,7 @@ class _LmmAppBarState extends State<LmmAppBar> {
   @override
   void initState() {
     loadData();
-    //_timer();
+    _timer();
 
     super.initState();
   }
@@ -47,7 +45,7 @@ class _LmmAppBarState extends State<LmmAppBar> {
         });
       }
     });
-    setState(() {
+  setState(() {
       unreadMessages = cnt;
     });
   }

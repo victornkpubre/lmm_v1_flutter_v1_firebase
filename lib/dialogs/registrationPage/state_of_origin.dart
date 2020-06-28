@@ -16,13 +16,14 @@ class StateOfOriginDialog extends StatefulWidget {
 }
 
 class _StateOfOriginDialogState extends State<StateOfOriginDialog> {
-  String currentState = "Select a State";
-  List<String> states = ["Abuja", "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
-                          "Borno", "Cross River", "Delta", "Ebonyi", "Edo" "Ekiti", "Enugu", "Gombe", "Imo",
-                          "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nassarawa",
-                          "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe",
-                          "Zamfara"
-                        ];
+  TextEditingController controller = TextEditingController();
+  // String currentState = "Select a State";
+  // List<String> states = ["Abuja", "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue",
+  //                         "Borno", "Cross River", "Delta", "Ebonyi", "Edo" "Ekiti", "Enugu", "Gombe", "Imo",
+  //                         "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", "Nassarawa",
+  //                         "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", "Taraba", "Yobe",
+  //                         "Zamfara"
+  //                       ];
 
   @override
   Widget build(BuildContext context) {
@@ -73,77 +74,40 @@ class _StateOfOriginDialogState extends State<StateOfOriginDialog> {
               ),
 
               Container(
-                width: widget.width,
-                color: LmmColors.lmmGrey,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: <Widget>[
-                        Container(
-                          padding: EdgeInsets.fromLTRB(5, 5, 0, 0),
-                          color: LmmColors.lmmGrey,
-                          child: Text("State of Origin", style: TextStyle(
-                            fontSize: 16
-                          ),
-                          ),
-                        )
-                      ],
-                    ),
-                    Container(
-                      padding: EdgeInsets.all(15),
-                      child: Text(
-                        currentState, style: TextStyle(
-                          fontSize: 15
-                        ),
-                      ),  
-                    )
-                  ],
-                )
-              ),
-
-              Divider(color: Colors.transparent, height: 5),
-
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-
-                InkWell(
-                  child: Text("Select", style: TextStyle(fontSize: 18),),
-                  onTap: (){
-                    showPicker();
-                  },
-                ),
-
-                VerticalDivider(color: Colors.transparent),
-
-                Container(
-                  height: 35,
-                  width: 2,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage('assets/images/divider.png'),
-                      fit: BoxFit.fill
-                    ),
+                height: 3 * 18.0,
+                child: TextField(
+                  controller: controller,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    hintText: "State of Origin",
+                    fillColor: LmmColors.lmmGrey,
+                    filled: true,
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
                   ),
                 ),
-
-                VerticalDivider(color: Colors.transparent),
-
-                InkWell(
-                  child: Text("Enter", style: TextStyle(fontSize: 18),),
-                  onTap: (){
-                    widget.resultCallBack(currentState);
-                  },
-                )
-
-                ],
               ),
 
-              Divider(color: Colors.transparent, height: 5 ),
+              Divider(color: Colors.transparent),
 
+              InkWell(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+
+                    Text("Enter", style: TextStyle(fontSize: 18),)
+
+                  ],
+                ),
+                onTap: (){
+                  widget.resultCallBack(controller.text);
+                },
+              ),
+
+              Divider(color: Colors.transparent),
 
             ],
           ),
@@ -152,29 +116,29 @@ class _StateOfOriginDialogState extends State<StateOfOriginDialog> {
     );
   }
   
-  showPicker() {
-    showModalBottomSheet(
-        context: context,
-        builder: (BuildContext context) {
-          return Container(
-            height: widget.width*0.5,
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/images/goldGradient.png'),
-                fit: BoxFit.fill
-              ),
-            ),
+  // showPicker() {
+  //   showModalBottomSheet(
+  //       context: context,
+  //       builder: (BuildContext context) {
+  //         return Container(
+  //           height: widget.width*0.5,
+  //           decoration: BoxDecoration(
+  //             image: DecorationImage(
+  //               image: AssetImage('assets/images/goldGradient.png'),
+  //               fit: BoxFit.fill
+  //             ),
+  //           ),
 
-            child: CupertinoPicker(
-              onSelectedItemChanged: (value) {
-                setState(() {
-                  currentState = states[value];
-                });
-              },
-              itemExtent: 30.0,
-              children: states.map((state)=> Text(state, style: TextStyle(fontSize: 15),)).toList()
-            ),
-          );
-        });
-  }
+  //           child: CupertinoPicker(
+  //             onSelectedItemChanged: (value) {
+  //               setState(() {
+  //                 currentState = states[value];
+  //               });
+  //             },
+  //             itemExtent: 30.0,
+  //             children: states.map((state)=> Text(state, style: TextStyle(fontSize: 15),)).toList()
+  //           ),
+  //         );
+  //       });
+  // }
 }

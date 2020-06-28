@@ -204,10 +204,14 @@ class FirebaseRealtimeDatabaseManager{
       int count = count_value.value;
       for (var i = 0; i < count; i++) {
         String uid = await getUid(table, i);
-        await database_table.child(uid).once().then((value) {
-          Map map = value.value;
-          mapList.add(map);
-        });
+        if(uid != null){
+          await database_table.child(uid).once().then((value) {
+            if(value.value != null){
+              Map map = value.value;
+              mapList.add(map);
+            }
+          });
+        }
       }
     });
 
@@ -226,7 +230,9 @@ class FirebaseRealtimeDatabaseManager{
     int count = count_value.value;
     for (var i = 0; i < count; i++) {
       DataSnapshot uid = await index_table.child("$i").once();
-      list.add(uid.value["uid"]);
+      if(uid.value != null){
+        list.add(uid.value["uid"]);
+      }
     }  
 
     return json.encode(list);
@@ -243,7 +249,9 @@ class FirebaseRealtimeDatabaseManager{
       int count = count_value.value;
       for (var i = 0; i < count; i++) {
         DataSnapshot uid = await index_table.child("$i").once();
-        list.add(uid.value["id"]);
+        if(uid.value != null){
+          list.add(uid.value["uid"]);
+        }
       }
     });
 

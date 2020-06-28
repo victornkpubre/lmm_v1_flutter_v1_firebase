@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:lagos_match_maker/apis/generic_database_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/login_page.dart';
 import 'package:lagos_match_maker/pages/personalzed_congrats_page.dart';
@@ -13,6 +14,23 @@ class MembershipPage extends StatefulWidget {
 }
 
 class _MembershipPageState extends State<MembershipPage> {
+  String premium_price = "----";
+
+
+  @override
+  void initState() {
+    setPremiumPrice();
+    super.initState();
+  }
+
+  setPremiumPrice() async{
+    String temp = await FirebaseRealtimeDatabaseManager().readString("premium_price");
+
+    setState(() {
+      premium_price = temp;
+    });
+    
+  }
   
   
   @override
@@ -185,7 +203,7 @@ class _MembershipPageState extends State<MembershipPage> {
 
                                 Container(
                                   padding: EdgeInsets.fromLTRB(20,10,20,5),
-                                  child: Text("(N4,800)", style: TextStyle(color: Colors.black54, fontSize: 10),),
+                                  child: Text("($premium_price)", style: TextStyle(color: Colors.black54, fontSize: 10),),
                                 ),
 
                               ],

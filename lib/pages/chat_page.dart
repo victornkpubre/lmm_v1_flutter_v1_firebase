@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:lagos_match_maker/apis/colors.dart';
 import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
-import 'package:lagos_match_maker/apis/fcm_manager.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/apis/messaging.dart';
 import 'package:lagos_match_maker/apis/nbb_textarea.dart';
@@ -18,12 +17,14 @@ class ChatPage extends StatefulWidget {
   User user;
   User messenger;
   List<TextMessage> messages;
+  Function(List<TextMessage>) callBackFunction;
   
 
   ChatPage({
     @required this.user,
     @required this.messenger,
     @required this.messages,
+    @required this.callBackFunction
   });
 
   @override
@@ -52,7 +53,6 @@ class _ChatPageState extends State<ChatPage> {
     _firebaseMessaging.configure(
       onMessage: (Map< String , dynamic> message) async{ 
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
@@ -73,7 +73,6 @@ class _ChatPageState extends State<ChatPage> {
       },
       onLaunch: (Map< String , dynamic> message) async{
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
@@ -94,7 +93,6 @@ class _ChatPageState extends State<ChatPage> {
       },
       onResume: (Map< String , dynamic> message) async{
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
@@ -133,10 +131,14 @@ class _ChatPageState extends State<ChatPage> {
           centerTitle: true,
           backgroundColor: Colors.black,
           elevation: 0,
-          title: LmmAppBar(user: widget.user),
+          title: widget.user.uid.compareTo("admin")==0? 
+            LmmAppBar():
+            LmmAppBar(user: widget.user),
         ),
 
-        bottomSheet: LmmBottomBar(user: widget.user),
+        bottomSheet: widget.user.uid.compareTo("admin")==0? 
+          LmmBottomBar():
+          LmmBottomBar(user: widget.user),
 
         body: Container(
           padding: EdgeInsets.all(10),
@@ -156,7 +158,7 @@ class _ChatPageState extends State<ChatPage> {
                       child: Text("Message Your Match", style: TextStyle(color: LmmColors.lmmGold, fontSize: 15),),
                     ):
                     ListView.builder(
-                      //reverse: true,
+                      
                       controller: scrollController,
                       itemCount: widget.messages.length,
                       itemBuilder: (context, index){
@@ -253,6 +255,9 @@ class _ChatPageState extends State<ChatPage> {
                               widget.messages.add(textMessage);
                               scrollMessages();
                             });
+
+                            widget.callBackFunction(widget.messages);
+
                           }
                         },
                       ),
@@ -269,6 +274,23 @@ class _ChatPageState extends State<ChatPage> {
 
     );
   }
+
+  List<TextMessage> removeDuplicates(List<TextMessage> list){
+    List temp;
+
+    for (var i = 0; i < list.length; i++) {
+      if(i < list.length - 2){
+        if(list[i].body.compareTo(list[i+1].body)==0){
+          temp.add(list[i]);
+        }
+      }
+      else{
+        temp.add(list[i]);
+      }
+    }
+    return temp;
+  }
+
 
 
   Future<void> sendNotification(TextMessage text, String receiver) async{

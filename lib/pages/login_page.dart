@@ -2,7 +2,9 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:lagos_match_maker/apis/colors.dart';
 import 'package:lagos_match_maker/apis/generic_database_manager.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
@@ -11,6 +13,7 @@ import 'package:lagos_match_maker/pages/admin_page.dart';
 import 'package:lagos_match_maker/pages/match_page.dart';
 import 'package:lagos_match_maker/pages/membership_page.dart';
 import 'package:lagos_match_maker/pages/registration_page.dart';
+import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 
 
 
@@ -29,11 +32,13 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage> {
   String state = "login";
-
+  String error_message;
   TextEditingController adminController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController retypepasswordController = TextEditingController();
+
+  GoogleSignIn googleAuth = GoogleSignIn();
 
   @override
   void initState() {
@@ -185,11 +190,38 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         )
                       ),
-                      onTap: (){
+                      onTap: () async {
                         if(isInLoginState()){
                           //Login
                           if(validate()){
-                            login(emailController.text, passwordController.text);
+                            showLoading('Loading User');
+                            User user = await login(emailController.text, passwordController.text);
+                            if(user != null){
+                              closeLoginLoading(true);
+                              widget.user.uid = user.uid;
+                              widget.user.email = user.email;
+                              widget.user.password = user.password;
+
+                              //getUser details
+                              String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", widget.user.uid);
+                              widget.user = User.fromJson(json.decode(jsonStr));
+
+                              //login locally
+                              LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
+
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+
+                              //Navigate to MatchPage with user
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
+                              );
+                              
+                            }
+                            else{
+                              closeLoginLoading(false);
+                            }
+
                           }
                           else{
                             //Toast
@@ -208,18 +240,39 @@ class _LoginPageState extends State<LoginPage> {
                           //Sign Up
                           if(validate()){
                             if(passwordController.text.compareTo(retypepasswordController.text)==0){
-                              signup( emailController.text, passwordController.text);
+
+                              showLoading('Creating User');
+                              User user = await signup( emailController.text, passwordController.text);
+
+                              if(user != null){
+                                closeSignUpLoading(true);
+                                widget.user.uid = user.uid;
+                                widget.user.email = user.email;
+                                widget.user.password = user.password;
+
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+
+                                //Navigate to RegistrationPage with user
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => RegistrationPage(user: widget.user,)),
+                                );
+                              }
+                              else{
+                                closeSignUpLoading(false);
+                              }
+                              
                             }else{
 
                               //Toast
                               Fluttertoast.showToast(
                                 msg: "Opps... Passowrds dont Match. Not a Good Start to Matching",
-                                toastLength: Toast.LENGTH_SHORT,
+                                toastLength: Toast.LENGTH_LONG,
                                 gravity: ToastGravity.CENTER,
                                 timeInSecForIosWeb: 1,
                                 backgroundColor: LmmColors.lmmGrey,
-                                textColor: Colors.white,
-                                fontSize: 16.0
+                                textColor: Colors.black,
+                                fontSize: 12.0
                               );                              
 
                             }
@@ -228,12 +281,12 @@ class _LoginPageState extends State<LoginPage> {
                             //Toast
                             Fluttertoast.showToast(
                               msg: "Opps... Did You Put in Your Email and Password",
-                              toastLength: Toast.LENGTH_SHORT,
+                              toastLength: Toast.LENGTH_LONG,
                               gravity: ToastGravity.CENTER,
                               timeInSecForIosWeb: 1,
                               backgroundColor: LmmColors.lmmGrey,
-                              textColor: Colors.white,
-                              fontSize: 16.0
+                              textColor: Colors.black,
+                              fontSize: 12.0
                             );
                           }
                         }
@@ -352,6 +405,60 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                         ),
+                        onTap: () async {
+
+                          showLoading('Loading Facebook Account');
+                          User user = await facebookLogin();
+                          if(user != null){
+                            //Nav to MatchPage
+                            closeLoginLoading(true);
+
+                            widget.user.uid = user.uid;
+                            widget.user.email = user.email;
+                            widget.user.password = "facebook";
+
+                            if(await FirebaseRealtimeDatabaseManager().uidExists("user", widget.user.uid)){
+                            //Login
+                              //getUser details
+                              String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", widget.user.uid);
+                              widget.user = User.fromJson(json.decode(jsonStr));
+
+                              //login locally
+                              LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
+
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+
+                              //Navigate to MatchPage with user
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
+                              );
+                            }
+                            else{
+                            //Sign Up
+                              closeSignUpLoading(true);
+                              widget.user.uid = user.uid;
+                              widget.user.email = user.email;
+                              widget.user.password = user.password;
+
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+
+                              //Navigate to RegistrationPage with user
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => RegistrationPage(user: widget.user,)),
+                              );
+                            }
+                          }
+                          else{
+                            
+                            closeSignUpLoading(false);
+
+                          }
+
+                          
+
+                        },
                       ),
 
                       Divider(color: Colors.transparent),
@@ -384,6 +491,58 @@ class _LoginPageState extends State<LoginPage> {
                             ],
                           ),
                         ),
+                        onTap: () async {
+
+                          showLoading('Loading Google Account');
+                          User user = await googleLogin();
+                          if(user != null){
+                            //Nav to MatchPage
+                            closeLoginLoading(true);
+
+                            widget.user.uid = user.uid;
+                            widget.user.email = user.email;
+                            widget.user.password = "google";
+
+                            if(await FirebaseRealtimeDatabaseManager().uidExists("user", widget.user.uid)){
+                            //Login
+                              //getUser details
+                              String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", widget.user.uid);
+                              widget.user = User.fromJson(json.decode(jsonStr));
+
+                              //login locally
+                              LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
+
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+
+                              //Navigate to MatchPage with user
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
+                              );
+                            }
+                            else{
+                            //Sign Up
+                              closeSignUpLoading(true);
+                              widget.user.uid = user.uid;
+                              widget.user.email = user.email;
+                              widget.user.password = user.password;
+
+                              Navigator.of(context).popUntil((route) => route.isFirst);
+
+                              //Navigate to RegistrationPage with user
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(builder: (context) => RegistrationPage(user: widget.user,)),
+                              );
+                            }
+                          }
+                          else{
+                            
+                            closeSignUpLoading(false);
+
+                          }
+
+                        },
                       ),
 
                       Divider(color: Colors.transparent,),
@@ -393,6 +552,7 @@ class _LoginPageState extends State<LoginPage> {
                         children: [
 
                           Container(
+                            padding: EdgeInsets.all(15),
                             width: size.width,
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.end,
@@ -447,65 +607,105 @@ class _LoginPageState extends State<LoginPage> {
     return state.compareTo("login")==0;
   }
 
-  login(String _email, String _password) async {
-
+  Future<User> login(String _email, String _password) async {
     //Login n get Uid
+    _email = _email.trim();
+    _password = _password.trim();
     User user = await emailLogin(_email, _password);
-    widget.user.uid = user.uid;
-    widget.user.email = user.email;
-    widget.user.password = user.password;
-
-    //getUser details
-    String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", widget.user.uid);
-    widget.user = User.fromJson(json.decode(jsonStr));
-
-    //login locally
-    LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
-
-    Navigator.of(context).popUntil((route) => route.isFirst);
-
-    //Navigate to MatchPage with user
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
-    );
-
+    return user;
   }
 
-  signup(String _email, String _password) async {
-
+  Future<User> signup(String _email, String _password) async {
     //Sign Up n get Uid
     //load user with email n password
-    //widget.user = User();
+    _email = _email.trim();
+    _password = _password.trim();
     User user = await emailSignUp(_email, _password);
-    widget.user.uid = user.uid;
-    widget.user.email = user.email;
-    widget.user.password = user.password;
+    return user;
+  }
 
-    Navigator.of(context).popUntil((route) => route.isFirst);
 
-    //Navigate to RegistrationPage with user
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => RegistrationPage(user: widget.user,)),
+  Future<User> facebookLogin() async {
+
+    final facebookLogin = FacebookLogin();
+    final result = await facebookLogin.logIn(['email']).catchError((e){
+      print('Error: $e');
+      Fluttertoast.showToast(
+        msg: 'Error: $e',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: LmmColors.lmmGrey,
+        textColor: Colors.black,
+        fontSize: 12.0
+      );
+    });
+
+    if(result.status == FacebookLoginStatus.loggedIn){
+      final credential = FacebookAuthProvider.getCredential(accessToken: result.accessToken.token);
+      final AuthResult authResult = await FirebaseAuth.instance.signInWithCredential(credential).catchError((e){
+        print('Error: $e');
+        Fluttertoast.showToast(
+          msg: 'Error: $e',
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.CENTER,
+          timeInSecForIosWeb: 3,
+          backgroundColor: LmmColors.lmmGrey,
+          textColor: Colors.black,
+          fontSize: 12.0
+        );
+      });
+      final FirebaseUser fbUser = authResult.user;
+      User user = User();
+      user.email = fbUser.email;
+      user.uid = fbUser.uid;
+      user.email = fbUser.email;
+      return user;
+    }
+
+  }
+
+  
+  Future<User> googleLogin() async {
+
+    final GoogleSignInAccount googleSignInAccount = await googleAuth.signIn().catchError((e){
+      print('Error: $e');
+      Fluttertoast.showToast(
+        msg: 'Error: $e',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: LmmColors.lmmGrey,
+        textColor: Colors.black,
+        fontSize: 12.0
+      );
+    });
+    
+    final GoogleSignInAuthentication googleSignInAuthentication = await googleSignInAccount.authentication.catchError((e){
+      print('Error: $e');
+      Fluttertoast.showToast(
+        msg: 'Error: $e',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: LmmColors.lmmGrey,
+        textColor: Colors.black,
+        fontSize: 12.0
+      );
+    });
+
+    final AuthCredential credential = GoogleAuthProvider.getCredential(
+      accessToken: googleSignInAuthentication.accessToken,
+      idToken: googleSignInAuthentication.idToken,
     );
 
-
-  }
-
-  facebookLogin(){
-
-  }
-
-  facebookSignup(){
-
-  }
-  
-  googleLogin(){
-
-  }
-
-  googleSignup(){
+    final AuthResult authResult = await FirebaseAuth.instance.signInWithCredential(credential);
+    final FirebaseUser fbUser = authResult.user;
+    User user = User();
+    user.email = fbUser.email;
+    user.uid = fbUser.uid;
+    user.email = fbUser.email;
+    return user;
 
   }
 
@@ -516,7 +716,7 @@ class _LoginPageState extends State<LoginPage> {
     && passwordController.value.text!=null){
       return true;
     }
-    else{
+    else{  
       return false;
     }
   }
@@ -535,7 +735,18 @@ class _LoginPageState extends State<LoginPage> {
       return user_obj;
     }
     catch (e){
+      PlatformException error = e as PlatformException;
+      error_message = error.message;
       print('Error: $e');
+      Fluttertoast.showToast(
+        msg: 'Error: $e',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: LmmColors.lmmGrey,
+        textColor: Colors.black,
+        fontSize: 12.0
+      );
     }
   }
 
@@ -552,9 +763,94 @@ class _LoginPageState extends State<LoginPage> {
       return user_obj;
     }
     catch (e){
+      PlatformException error = e as PlatformException;
+      error_message = error.message;
       print('Error: $e');
+      Fluttertoast.showToast(
+        msg: 'Error: $e',
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.CENTER,
+        timeInSecForIosWeb: 3,
+        backgroundColor: LmmColors.lmmGrey,
+        textColor: Colors.black,
+        fontSize: 12.0
+      );
     }
   }
+
+  void showLoading(String loadingText){
+    showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context){
+        return Dialog(
+          child: Container(
+            color: LmmColors.lmmGold,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Padding(
+                      padding: EdgeInsets.all(25),
+                      child: CircularProgressIndicator( 
+                        valueColor: new AlwaysStoppedAnimation<Color>(Color.fromRGBO(100,100,100,1)),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.all(15),
+                      child: Container(
+                        width: 150,
+                        child: Text('$loadingText...', style: TextStyle(fontSize: 13),),
+                      )
+                    )
+                  ],
+                ),
+                Center(
+                  child: error_message == null? 
+                  Container(): 
+                  Container(
+                    padding: EdgeInsets.fromLTRB(20, 10, 20, 10),
+                    child: Text('Error: $error_message', textAlign: TextAlign.center,),
+                  )
+                )
+              ],
+            )
+
+          ),
+        );
+      }
+    );
+  }
+
+  void closeSignUpLoading(bool successful) async{
+    Navigator.pop(context);
+    setState(() {
+      if(successful){
+        showLoading('Sign Up Successful');
+      }else{
+        showLoading('Sign Up Failed');
+      }
+    });
+  
+    error_message = null;
+  }
+
+  void closeLoginLoading(bool successful) async{
+    Navigator.pop(context);
+    setState(() {
+      if(successful){
+        showLoading('Login Up Successful');
+      }else{
+        showLoading('Login Up Failed');
+      }
+    });
+  
+    error_message = null;
+  }
+
+
 
 }
 

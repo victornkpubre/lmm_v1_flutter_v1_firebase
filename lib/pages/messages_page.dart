@@ -28,13 +28,13 @@ class _MessagesPageState extends State<MessagesPage> {
   Map<String, List<TextMessage>> messages;
   List<String> messengers;
   List<User> users;
-  // FirebaseMessaging _firebaseMessaging;  
+  FirebaseMessaging _firebaseMessaging;  
   
 
   @override
   void initState() {
-    // FcmManager().initFCM(widget.user.uid);
-    // _firebaseMessaging = FcmManager().getFirebaseObject();
+    FcmManager().initFCM(widget.user.uid);
+    _firebaseMessaging = FcmManager().getFirebaseObject();
 
     loadData();
     
@@ -184,7 +184,11 @@ class _MessagesPageState extends State<MessagesPage> {
 
                         Navigator.pushReplacement(
                           context,
-                          MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: users[index], messages: messages[users[index].uid],)),
+                          MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: users[index], messages: messages[users[index].uid], callBackFunction: (list){
+                            setState(() {
+                              messages[users[index].uid] = list;
+                            });
+                          },)),
                         );
 
                       },

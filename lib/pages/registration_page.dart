@@ -19,9 +19,7 @@ import 'package:lagos_match_maker/dialogs/registrationPage/state_of_origin.dart'
 import 'package:lagos_match_maker/dialogs/registrationPage/summary.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/basic_congrats_page.dart';
-import 'package:lagos_match_maker/pages/match_page.dart';
 import 'package:lagos_match_maker/pages/premium_registeration_page.dart';
-import 'package:lagos_match_maker/widgets/lmm_appbar.dart';
 import 'package:lagos_match_maker/widgets/lmm_bottombar.dart';
 import 'package:random_string/random_string.dart';
 import 'dart:math' show Random;
@@ -131,7 +129,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
               SizedBox(
                 height: dialogScreenHeight,
                 width: size.width,
-                child: Center(
+                child: submitting?
+                Center(
+                  child: CircularProgressIndicator(backgroundColor: LmmColors.lmmGold),
+                ):
+                Center(
                   child: Animator<double>(
                     animatorKey: animatorKey,
                     tween: Tween<double>(begin: 1, end: 0),
@@ -139,9 +141,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                     builder: (context, animatorState, child ) => Center(
                       child: Opacity(
                         opacity: animatorState.value,
-                        child: submitting? 
-                          CircularProgressIndicator():
-                          currentDialog == null? initDialog: currentDialog
+                        child: currentDialog == null? initDialog: currentDialog
                       )
                     ),
                     endAnimationListener: (animatorState){
@@ -298,20 +298,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
 
-  educationCallBackFunction(String text){
-    widget.user.education = text;
-    currentStage = 9;
-
-    //Fade Out GenderDialog
-    animatorKey.triggerAnimation();
-
-    print(widget.user.education);
-  }
-
-
   careerCallBackFunction(String text){
     widget.user.carrer = text;
-    currentStage = 10;
+    currentStage = 9;
 
     //Fade Out GenderDialog
     animatorKey.triggerAnimation();
@@ -320,8 +309,24 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
 
+  educationCallBackFunction(String text){
+    widget.user.education = text;
+    currentStage = 10;
+
+    //Fade Out GenderDialog
+    animatorKey.triggerAnimation();
+
+    print(widget.user.education);
+  }
+
+
   summaryCallBackFunction(String text) async {
     if(!submitting){
+
+      setState(() {
+        submitting = true;
+      });
+
       widget.user.summary = text;
       currentStage = 11;
 
@@ -336,7 +341,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
       //login locally
       LmmSharedPreferenceManager().loginUser(widget.user.email, widget.user.password, widget.user.uid);
 
-      submitting = false;
+      
       
       //End of Basic Registration 
       if(widget.user.membership.compareTo("basic")==0){

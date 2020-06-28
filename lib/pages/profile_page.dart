@@ -5,6 +5,7 @@ import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
 import 'package:lagos_match_maker/apis/generic_database_manager.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
+import 'package:lagos_match_maker/pages/premium_registeration_page.dart';
 import 'package:lagos_match_maker/splash_screen.dart';
 import 'package:lagos_match_maker/widgets/lmm_appbar.dart';
 import 'package:lagos_match_maker/widgets/lmm_bottombar.dart';
@@ -34,7 +35,8 @@ class _ProfilePageState extends State<ProfilePage> {
   TextEditingController phoneController = TextEditingController();
   TextEditingController educationController = TextEditingController();
   TextEditingController careerController = TextEditingController();
-
+  TextEditingController locationController = TextEditingController();
+  TextEditingController stateOfOriginController = TextEditingController();
 
 
   @override
@@ -43,6 +45,8 @@ class _ProfilePageState extends State<ProfilePage> {
       summaryController.text = widget.user.summary;
       educationController.text = widget.user.education;
       careerController.text = widget.user.carrer;
+      locationController.text = widget.user.location;
+      stateOfOriginController.text = widget.user.stateOfOrigin;
     }
     
     super.initState();
@@ -78,6 +82,43 @@ class _ProfilePageState extends State<ProfilePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+
+                //Membership
+                InkWell(
+                  child: Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: <Widget>[
+                        widget.user.membership.compareTo("basic")==0?
+                        Text("Membership\n Basic", style: titleStyle,):
+                        Text("Membership\n Premium", style: titleStyle,)
+                      ]
+                    ),
+                  ),
+                  onTap: (){
+                    //if basic request upgrade
+                    if(widget.user.membership.compareTo("basic")==0){
+                      requestUpgrade();
+                    }
+                  },
+                ),
+                InkWell(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      widget.user.membership.compareTo("basic")==0?
+                      Text("Click to Upgrade", style: detailsStyle,):
+                      Container(),
+                    ],
+                  ),
+                  onTap: (){
+                    //if basic request upgrade
+                    if(widget.user.membership.compareTo("basic")==0){
+                      requestUpgrade();
+                    }
+                  },
+                ),
+
 
                 //Codename
                 Text("CodeName", style: titleStyle,),
@@ -149,7 +190,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Center(child: Text("Change"),)
                   ),
                   onTap: (){
-                    FirebaseRealtimeDatabaseManager().updateWIthUid("users", widget.user.uid, "summary", summaryController.text);
+                    FirebaseRealtimeDatabaseManager().updateWIthUid("user", widget.user.uid, "summary", summaryController.text);
                   },
                 ),
                 Divider(color: Colors.transparent,),
@@ -195,7 +236,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Center(child: Text("Change"),)
                   ),
                   onTap: (){
-                    FirebaseRealtimeDatabaseManager().updateWIthUid("users", widget.user.uid, "education", educationController.text);
+                    FirebaseRealtimeDatabaseManager().updateWIthUid("user", widget.user.uid, "education", educationController.text);
                   },
                 ),
                 Divider(color: Colors.transparent,),
@@ -243,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     child: Center(child: Text("Change"),)
                   ),
                   onTap: (){
-                    FirebaseRealtimeDatabaseManager().updateWIthUid("users", widget.user.uid, "career", careerController.text);
+                    FirebaseRealtimeDatabaseManager().updateWIthUid("user", widget.user.uid, "career", careerController.text);
                   },
                 ),
                 Divider(color: Colors.transparent,),
@@ -251,49 +292,95 @@ class _ProfilePageState extends State<ProfilePage> {
 
 
                 //Location
-                InkWell(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text("Location", style: titleStyle,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(widget.user.location, style: detailsStyle,),
-                          Icon(Icons.keyboard_arrow_down, size: 25, color: LmmColors.lmmGold,)
-                        ],
+                Text("Location", style: titleStyle,),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      height: 3 * 18.0,
+                      width: size.width*0.8,
+                      decoration: BoxDecoration(
+                        color: LmmColors.lmmDarkGrey,
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
                       ),
-                      Divider(color: LmmColors.lmmGold, height: 2,),
-                    ],
+                      child: TextField(
+                        controller: locationController,
+                        maxLines:  3,
+                        decoration: InputDecoration(
+                          fillColor: Colors.transparent,
+                          filled: true,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                        ),
+                      )
+                    )
+                  ],
+                ),
+                InkWell(
+                  child: Container(
+                    height: 30,
+                    width: size.width*0.8,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/goldGradient.png'),
+                        fit: BoxFit.fill
+                      ),
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15))
+                    ),
+                    child: Center(child: Text("Change"),)
                   ),
                   onTap: (){
-                    showLocationPicker(context);
+                    FirebaseRealtimeDatabaseManager().updateWIthUid("user", widget.user.uid, "location", locationController.text);
                   },
                 ),
-                Divider(color: Colors.transparent,),
                 Divider(color: Colors.transparent,),
 
                 //State of Origin
-                InkWell(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text("State of Origin", style: titleStyle,),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          Text(widget.user.stateOfOrigin, style: detailsStyle,),
-                          Icon(Icons.keyboard_arrow_down, size: 25, color: LmmColors.lmmGold,)
-                        ],
+                Text("State of Origin", style: titleStyle,),
+                Row(
+                  children: <Widget>[
+                    Container(
+                      height: 3 * 18.0,
+                      width: size.width*0.8,
+                      decoration: BoxDecoration(
+                        color: LmmColors.lmmDarkGrey,
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15))
                       ),
-                      Divider(color: LmmColors.lmmGold, height: 2,),
-                    ],
+                      child: TextField(
+                        controller: locationController,
+                        maxLines:  3,
+                        decoration: InputDecoration(
+                          fillColor: Colors.transparent,
+                          filled: true,
+                          border: InputBorder.none,
+                          focusedBorder: InputBorder.none,
+                          enabledBorder: InputBorder.none,
+                          errorBorder: InputBorder.none,
+                          disabledBorder: InputBorder.none,
+                        ),
+                      )
+                    )
+                  ],
+                ),
+                InkWell(
+                  child: Container(
+                    height: 30,
+                    width: size.width*0.8,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: AssetImage('assets/images/goldGradient.png'),
+                        fit: BoxFit.fill
+                      ),
+                      borderRadius: BorderRadius.only(bottomLeft: Radius.circular(15), bottomRight: Radius.circular(15))
+                    ),
+                    child: Center(child: Text("Change"),)
                   ),
                   onTap: (){
-                    showStateOfOriginPicker(context);
+                    FirebaseRealtimeDatabaseManager().updateWIthUid("user", widget.user.uid, "stateOfOrigin", stateOfOriginController.text);
                   },
                 ),
-                Divider(color: Colors.transparent,),
                 Divider(color: Colors.transparent,),
 
 
@@ -933,6 +1020,13 @@ class _ProfilePageState extends State<ProfilePage> {
 
     );
     
+  }
+
+  requestUpgrade(){
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => PremiumRegistrationPage(user: widget.user)),
+    );
   }
 
 

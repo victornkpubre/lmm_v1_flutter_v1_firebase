@@ -41,11 +41,49 @@ class UserProfile extends StatefulWidget {
                         padding: EdgeInsets.fromLTRB(0,5,5,0),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.end,
+                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(widget.user.codename, style: TextStyle(color: LmmColors.lmmGold, fontFamily: "Top Secret", fontSize: 30),),
+                            Text(widget.user.codename, style: TextStyle(color: LmmColors.lmmGold, fontFamily: "Cinzel Black", fontSize: size.height*0.1),),
                           ],
                         ),
+                      ),
+
+                      //Page divider
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: <Widget>[
+
+                          Container(
+                            color: Colors.white,
+                            child: SizedBox(
+                              width: size.width*0.3,
+                              height: 2,
+                            ),
+                          ),
+
+
+                          Container(
+                              margin: EdgeInsets.all(5),
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage('assets/images/logo.png'),
+                                  fit: BoxFit.fill
+                                ),
+                              ),
+                              height: 15,
+                              width: 15,
+                          ),
+
+
+                          Container(
+                            color: Colors.white,
+                            child: SizedBox(
+                              width: size.width*0.3,
+                              height: 2,
+                            ),
+                          ),
+
+                        ],
                       ),
                       
 
@@ -104,55 +142,30 @@ class UserProfile extends StatefulWidget {
                       
                       Divider(color: Colors.transparent, height: size.height*0.01,),
 
-                      //Page divider
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-
-                          Container(
-                            color: Colors.white,
-                            child: SizedBox(
-                              width: size.width*0.3,
-                              height: 2,
-                            ),
-                          ),
-
-
-                          Container(
-                              margin: EdgeInsets.all(5),
-                              decoration: BoxDecoration(
-                                image: DecorationImage(
-                                  image: AssetImage('assets/images/logo.png'),
-                                  fit: BoxFit.fill
-                                ),
-                              ),
-                              height: 15,
-                              width: 15,
-                          ),
-
-
-                          Container(
-                            color: Colors.white,
-                            child: SizedBox(
-                              width: size.width*0.3,
-                              height: 2,
-                            ),
-                          ),
-
-                        ],
-                      ),
+                      
                       
                       Container(
                         padding: EdgeInsets.fromLTRB(15,5,15,5),
                         child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
                             Text(widget.user.location, style: detailTextStyle,),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                             Text("${dobToAge(widget.user.dob)}", style: detailTextStyle),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                             Text(religionToText(widget.user.religion), style: detailTextStyle),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                             Text(widget.user.genotype.toUpperCase(), style: detailTextStyle),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                             Text(widget.user.education, style: detailTextStyle),
-                            Text(widget.user.carrer, style: detailTextStyle),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                             Text(widget.user.stateOfOrigin, style: detailTextStyle),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
+                            Container(
+                              width: size.width*0.6,
+                              child: Text(widget.user.carrer, style: detailTextStyle),
+                            ),
+                            Divider(color: Colors.transparent, height: size.height*0.005,),
                           ],
                         ),
                       ),

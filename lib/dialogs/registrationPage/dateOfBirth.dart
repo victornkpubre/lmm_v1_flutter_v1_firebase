@@ -18,7 +18,7 @@ class DateOfBirthDialog extends StatefulWidget {
 
 class _DateOfBirthDialogState extends State<DateOfBirthDialog> {
   DateTime currentDate = DateTime.now();
-  List<String> months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
+  List<String> months = ["", "Jan", "Feb", "Mar", "Apr", "May", "Jun", "July", "Aug", "Sept", "Oct", "Nov", "Dec"];
 
   @override
   Widget build(BuildContext context) {
@@ -147,6 +147,7 @@ class _DateOfBirthDialogState extends State<DateOfBirthDialog> {
                 //DateTime newdate = DateTime(result.year, result.month - 1, result.day, result.hour);
                 setState(() {
                   currentDate = newdate;
+                  //print(currentDate.month);
                 });
               },
               use24hFormat: true,

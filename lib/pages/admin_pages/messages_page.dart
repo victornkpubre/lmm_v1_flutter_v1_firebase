@@ -3,11 +3,14 @@ import 'package:lagos_match_maker/apis/colors.dart';
 import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
+import 'package:lagos_match_maker/pages/chat_page.dart';
 
 class AdminMessagesPage extends StatefulWidget {
+  User user;
   List<User> users;
 
   AdminMessagesPage({
+    @required this.user,
     @required this.users
   });
 
@@ -17,22 +20,35 @@ class AdminMessagesPage extends StatefulWidget {
 
 class _AdminMessagesPageState extends State<AdminMessagesPage> {
   Map<String, List<TextMessage>> messages;
-  List<String> messengers;
 
+  @override
+  void initState() {
+    loadData();
+    super.initState();
+  }
 
 
   loadData() async {
-    List<String> temp_messengers = await LmmSharedPreferenceManager().getAdminMessengers();
     Map<String, List<TextMessage>>  temp_messages = await LmmSharedPreferenceManager().getAdminMessages();
-    
+    temp_messages = completeMessages(temp_messages, widget.users);
 
     setState(() {
       messages = temp_messages;
-      messengers = temp_messengers;
-      
     });
 
   }
+
+
+  Map<String, List<TextMessage>> completeMessages(Map<String, List<TextMessage>> map, List<User> temp_users){
+    temp_users.forEach((user) {
+      if(map[user.uid] == null){
+        map[user.uid] = [];
+      }
+    });
+    return map;
+  }
+
+
 
 
   @override
@@ -43,23 +59,33 @@ class _AdminMessagesPageState extends State<AdminMessagesPage> {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         body: Container(
-          padding: EdgeInsets.all(60),
+          padding: EdgeInsets.fromLTRB(0,50,0,0),
           color: Colors.black,
           width: size.width,
           height: size.height,
           child: Column(
+            mainAxisSize: MainAxisSize.max,
             children: [
               Container(
                 child: Text("Messages", style: TextStyle(color: LmmColors.lmmGold, fontFamily: "Times New Roman", fontSize: 25)),
               ),
 
+              messages == null?
               Container(
+                height: size.height*0.7,
+                child: Center(
+                  child: CircularProgressIndicator(backgroundColor: LmmColors.lmmGold),
+                ),
+              ):
+              Container(
+                height: size.height*0.8,
+                width: size.width*0.8,
                 child: ListView.builder(
                   itemCount: widget.users.length,
                   itemBuilder: (context, index){
                     return InkWell(
                       child: Container(
-                        padding: EdgeInsets.fromLTRB(0,0,0,25),
+                        margin: EdgeInsets.fromLTRB(0,0,0,25),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/images/goldGradient.png'),
@@ -75,7 +101,7 @@ class _AdminMessagesPageState extends State<AdminMessagesPage> {
 
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10,10,10,5),
-                                  width: size.width*0.9,
+                                  width: size.width*0.8,
                                   child: Text(widget.users[index].codename, 
                                     style: TextStyle(
                                       fontSize: 18,
@@ -90,7 +116,7 @@ class _AdminMessagesPageState extends State<AdminMessagesPage> {
 
                                 Container(
                                   padding: EdgeInsets.fromLTRB(15,0,15,0),
-                                  width: size.width*0.9,
+                                  width: size.width*0.8,
                                   child: messages[widget.users[index].uid] != null ?
                                     messages[widget.users[index].uid].length == 0?
                                     Text(""):
@@ -106,7 +132,7 @@ class _AdminMessagesPageState extends State<AdminMessagesPage> {
 
                                 Container(
                                   padding: EdgeInsets.fromLTRB(10,10,10,10),
-                                  width: size.width*0.9,
+                                  width: size.width*0.8,
                                   child: messages[widget.users[index].uid] != null ?
                                     messages[widget.users[index].uid].length == 0?
                                     Text(""):
@@ -129,10 +155,14 @@ class _AdminMessagesPageState extends State<AdminMessagesPage> {
                       ),
                       onTap: () {
 
-                        // Navigator.pushReplacement(
-                        //   context,
-                        //   MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: users[index], messages: messages[users[index].uid],)),
-                        // );
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => ChatPage(user: widget.user, messenger: widget.users[index], messages: messages[widget.users[index].uid], callBackFunction: (list){
+                            setState(() {
+                              messages[widget.users[index].uid] = list;
+                            });
+                          },)),
+                        );
 
                       },
                     );

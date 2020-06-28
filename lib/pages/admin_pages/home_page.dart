@@ -1,12 +1,15 @@
 import 'dart:convert';
 
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:lagos_match_maker/apis/colors.dart';
 import 'package:lagos_match_maker/apis/generic_database_manager.dart';
+import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/admin_pages/messages_page.dart';
 import 'package:lagos_match_maker/pages/admin_pages/settings_page.dart';
+import 'package:lagos_match_maker/pages/chat_page.dart';
 import 'package:lagos_match_maker/widgets/admin_user_profile.dart';
 
 class AdminHomePage extends StatefulWidget {
@@ -21,6 +24,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   List<User> users;
   List<User> user_master = [];
   List<String> premium_requests = [];
+  Map<String, List<TextMessage>>  messages;
   bool playing = false;
   final player = AudioPlayer();
   AudioPlayer audioPlugin = AudioPlayer();
@@ -32,21 +36,26 @@ class _AdminHomePageState extends State<AdminHomePage> {
   }
 
   Future<void> loadInitUsers() async {
-    List<User> temp = [];
+    List<User> temp_users = [];
     List<String> rqt = [];
     String jsonStr = await FirebaseRealtimeDatabaseManager().readAll("user");
 
     List list = json.decode(jsonStr); 
     list.forEach((element) {
       User user = User.fromJson(element);
-      temp.add(user);
+      temp_users.add(user);
     });
 
     rqt = await FirebaseRealtimeDatabaseManager().readStringTable("premium_request");
 
+    Map<String, List<TextMessage>>  temp_messages = await LmmSharedPreferenceManager().getAdminMessages();
+  
+    temp_messages = completeMessages(temp_messages, temp_users);
+
     setState(() {
-      users = temp;
+      users = temp_users;
       user_master = List.castFrom(users);
+      messages = temp_messages;
       if(rqt != null){
         premium_requests = rqt;
       }
@@ -54,6 +63,15 @@ class _AdminHomePageState extends State<AdminHomePage> {
 
 
 
+  }
+
+  Map<String, List<TextMessage>> completeMessages(Map<String, List<TextMessage>> map, List<User> temp_users){
+    temp_users.forEach((user) {
+      if(map[user.uid] == null){
+        map[user.uid] = [];
+      }
+    });
+    return map;
   }
 
   bool isUnverifiedPremium(String uid){
@@ -161,9 +179,12 @@ class _AdminHomePageState extends State<AdminHomePage> {
                 ),
                 onTap: (){
 
+                  User user = User();
+                  user.uid = user.email = "admin";
+
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AdminMessagesPage(users: user_master,))
+                    MaterialPageRoute(builder: (context) => AdminMessagesPage(user: user, users: user_master,))
                   );
                   
                 },
@@ -307,11 +328,54 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                 ),
 
                                 //Image
-                                Visibility(
-                                  visible: isVerifiedPremium(users[index]) || isUnverifiedPremium(users[index].uid),
-                                  child: Container(
+                                InkWell(
+                                  child: Visibility(
+                                    visible: users[index].pictureUrl != null,
+                                    child: Container(
+                                      padding: EdgeInsets.fromLTRB(10,0,0,0),
+                                      child: users[index].pictureUrl == null?
+                                      Container():
+                                      Container(
+                                        height: 80,
+                                        width: 80,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(users[index].pictureUrl),
+                                            fit: BoxFit.fill
+                                          ),
+                                          shape: BoxShape.circle
 
+                                        ),
+
+                                      )
+
+                                    ),
                                   ),
+                                  onTap: (){
+
+                                    showDialog(
+                                      context: context,
+                                      barrierDismissible: false,
+                                      builder: (context){
+                                        return Container(
+                                          height: size.height*0.7,
+                                          color: Colors.black,
+                                          child: Center(
+                                            child: Container(
+                                              height: size.height*0.7,
+                                              decoration: BoxDecoration(
+                                                image: DecorationImage(
+                                                  image: NetworkImage(users[index].pictureUrl),
+                                                  fit: BoxFit.fitHeight
+                                                ),
+                                              ),
+                                            )
+                                          )
+                                        );
+                                      }
+                                    );
+
+                                  },
                                 ),
 
                                 Container(
@@ -349,14 +413,16 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                       barrierDismissible: false,
                                       builder: (context){
                                         return Container(
-                                          padding: EdgeInsets.all(35),
+                                          //padding: EdgeInsets.all(35),
                                           height: size.height,
                                           color: Colors.black,
-                                          child: Container(
-                                            height: size.height*0.6,
-                                            child: SingleChildScrollView(
-                                              child: AdminUserProfile(user: users[index]),
-                                            ),
+                                          child: Center(
+                                            child: Container(
+                                              height: size.height*0.6,
+                                              child: SingleChildScrollView(
+                                                child: AdminUserProfile(user: users[index]),
+                                              ),
+                                            )
                                           )
                                         );
                                       }
@@ -385,7 +451,17 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   ),
                                   onTap: (){
 
+                                    User user = User();
+                                    user.uid = user.email = "admin";      
                                     
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(builder: (context) => ChatPage(user: user, messenger: users[index], messages: messages[users[index].uid], callBackFunction: (list){
+                                        setState(() {
+                                          messages[users[index].uid] = list;
+                                        });
+                                      },)),
+                                    );
 
                                   },
                                 ),
@@ -423,10 +499,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   },
                                 ),
 
-                                //Play Audio --- if premium
-                                Visibility(
-                                  visible: users[index].membership.compareTo("basic") != 0,
-                                  child: InkWell(
+                                InkWell(
                                     child: Container(
                                       margin: EdgeInsets.fromLTRB(20,5,0,5),
                                       decoration: BoxDecoration(
@@ -438,43 +511,30 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                       ),
                                       child: Container(
                                         padding: EdgeInsets.fromLTRB(10, 5, 10, 5),
-                                        child: Text( playing? "Stop Audio": "Play Audio",  
+                                        child: Text( "Delete User",  
                                           style: TextStyle(
                                             fontSize: 14, 
                                             fontFamily: "Times New Roman",
-                                            color: users[index].voiceUrl != null? 
-                                              LmmColors.lmmDarkGrey: 
-                                              Colors.black
+                                            color: Colors.black
                                           ),
                                         ),
                                       )
                                     ),
-                                    onTap: (){
+                                    onTap: () async {
 
-                                      //Set audio
+                                      FirebaseRealtimeDatabaseManager().deleteWithUid("user", users[index].uid);
+                                      final AuthResult result = await FirebaseAuth.instance.createUserWithEmailAndPassword(email: users[index].email, password: users[index].password);
+                                      final FirebaseUser user = result.user;
 
-                                      if(users[index].voiceUrl != null){
-                                        player.setUrl(users[index].voiceUrl);
+                                      user.delete();
 
-                                        if(playing){
-                                          setState(() {
-                                            playing = false;
-                                          });
-                                          player.stop();
+                                      setState(() {
+                                        users.removeAt(index);
+                                      });
 
-                                        }else{
-                                          setState(() {
-                                            playing = true;
-                                          });
-                                          player.play();
-
-                                        }
-                                        
-                                      }
 
                                     },
                                   )
-                                )
 
                                 
                               ],

@@ -5,7 +5,6 @@ import 'package:audioplayerui/audioplayerui.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/flauto.dart';
-import 'package:flutter_sound/flutter_sound_player.dart';
 import 'package:flutter_sound/flutter_sound_recorder.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -38,6 +37,7 @@ class _PremiumRegistrationPageState extends State<PremiumRegistrationPage> {
   FlutterSoundRecorder flutterSound =  new FlutterSoundRecorder();
   bool recording = false;
   bool playing = false;
+  bool submitting = false;
   DateTime startTime;
   DateTime endTime;
   
@@ -76,7 +76,11 @@ class _PremiumRegistrationPageState extends State<PremiumRegistrationPage> {
           height: size.height,
           color: Colors.black,
           
-          child: Column(
+          child: submitting?
+          Center(
+            child: CircularProgressIndicator(backgroundColor: LmmColors.lmmGold),
+          ):
+          Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: <Widget>[
@@ -272,6 +276,10 @@ class _PremiumRegistrationPageState extends State<PremiumRegistrationPage> {
   }
 
   Future<void> submit() async {
+
+    setState(() {
+      submitting = true;
+    });
 
     //Change user membership to basic - pending approval
     widget.user.membership = "basic";

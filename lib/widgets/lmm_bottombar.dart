@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
-import 'package:lagos_match_maker/dialogs/matchPage/successful.dart';
 import 'package:lagos_match_maker/dialogs/matchPage/trialdialog.dart';
 import 'package:lagos_match_maker/models/index.dart';
 import 'package:lagos_match_maker/pages/match_page.dart';

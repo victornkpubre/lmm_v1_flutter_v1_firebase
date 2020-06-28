@@ -1,14 +1,9 @@
 import 'dart:convert';
 
-import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:lagos_match_maker/apis/fcm_manager.dart';
 import 'package:lagos_match_maker/apis/generic_database_manager.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
-import 'package:lagos_match_maker/pages/login_page.dart';
 import 'package:lagos_match_maker/pages/match_page.dart';
-import 'package:lagos_match_maker/pages/membership_page.dart';
-import 'package:lagos_match_maker/pages/registration_page.dart';
 
 import 'models/index.dart';
 
@@ -26,9 +21,6 @@ class _SplashScreenState extends State<SplashScreen> {
   bool animating = true;
   double logoHeight = 90;
   double logoWidth = 90;
-
-  FirebaseMessaging _firebaseMessaging;
-
 
 
   @override
@@ -57,11 +49,24 @@ class _SplashScreenState extends State<SplashScreen> {
       String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", (await LmmSharedPreferenceManager().getUserUid()));
       User user = User.fromJson(json.decode(jsonStr));
 
-      //Navigate to MatchPage with user
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => MatchPage(user: user,)),
-      );
+      if(user != null){
+
+        //Navigate to MatchPage with User
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MatchPage(user: user,)),
+        );
+
+      }
+      else{
+
+        //Navigate to MatchPage without user
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MatchPage()),
+        );
+
+      }
 
     }else{
       //Navigate to MatchPage without user

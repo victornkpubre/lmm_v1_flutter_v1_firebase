@@ -15,7 +15,7 @@ publish_to: 'none' # Remove this line if you wish to publish to pub.dev
 # In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
 # Read more about iOS versioning at
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-version: 1.0.0+1
+version: 1.0.3+3
 
 environment:
   sdk: ">=2.7.0 <3.0.0"
@@ -45,6 +45,8 @@ dependencies:
   just_audio: ^0.1.9
   random_string: ^2.0.1
   age: ^0.0.1
+  flutter_facebook_login: ^3.0.0
+  google_sign_in:
   
 
 
@@ -54,6 +56,12 @@ dev_dependencies:
   json_model:
   build_runner: ^1.0.0
   json_serializable: ^2.0.0
+  flutter_launcher_icons:
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/launcher/lmmLogo.png"
 
 
 # For information on the generic Dart part of this file, see the
@@ -85,6 +93,9 @@ flutter:
     - assets/images/facebookIcon.png
     - assets/images/googleIcon.png
     - assets/images/badge.png
+    - assets/images/instructions.png
+    - assets/images/swipe_left.png
+    - assets/images/swipe_right.png
 
 
   fonts:
@@ -108,9 +119,9 @@ flutter:
       fonts:
         - asset: assets/fonts/times_new_roman.ttf
 
-    - family: Top Secret
+    - family: Cinzel Black
       fonts:
-        - asset: assets/fonts/TOP_SECRET.ttf 
+        - asset: assets/fonts/Cinzel-Black.ttf
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -1,12 +1,9 @@
 
-import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:lagos_match_maker/apis/date_string_wrapper.dart';
 import 'package:lagos_match_maker/apis/lmm_shared_preference_manager.dart';
 import 'package:lagos_match_maker/models/index.dart';
-import 'package:lagos_match_maker/widgets/lmm_appbar.dart';
-import 'package:uuid/uuid.dart';
 
 class FcmManager{
   String userUid;
@@ -44,7 +41,6 @@ class FcmManager{
     _firebaseMessaging.configure(
       onMessage: (Map< String , dynamic> message) async{ 
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
@@ -61,7 +57,6 @@ class FcmManager{
       },
       onLaunch: (Map< String , dynamic> message) async{
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
@@ -80,7 +75,6 @@ class FcmManager{
         //Called when app not in foreground and notification id clicked
 
         final dynamic data = message['data'];
-        final dynamic notification = message['notification'];
         
         TextMessage textMessage = TextMessage();
         textMessage.uid = data["sender"];
