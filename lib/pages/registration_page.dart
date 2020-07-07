@@ -342,7 +342,6 @@ class _RegistrationPageState extends State<RegistrationPage> {
       LmmSharedPreferenceManager().loginUser(widget.user.email, widget.user.password, widget.user.uid);
 
       
-      
       //End of Basic Registration 
       if(widget.user.membership.compareTo("basic")==0){
         //Upload Basic User to Database

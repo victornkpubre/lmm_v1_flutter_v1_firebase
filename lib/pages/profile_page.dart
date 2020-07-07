@@ -90,8 +90,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: <Widget>[
                         widget.user.membership.compareTo("basic")==0?
-                        Text("Membership\n Basic", style: titleStyle,):
-                        Text("Membership\n Premium", style: titleStyle,)
+                        Text("Membership: BASIC", style: detailsStyle,):
+                        Text("Membership: PREMIUM", style: detailsStyle,)
                       ]
                     ),
                   ),

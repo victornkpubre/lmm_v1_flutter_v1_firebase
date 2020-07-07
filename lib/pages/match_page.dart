@@ -585,9 +585,7 @@ class _MatchPageState extends State<MatchPage> {
 
     if(nomorematches == true){
 
-      setState(() {
-        nomorematches = true;
-      });
+      //Do Nothing
 
     }else{
       if(currentIndex < users.length - 1){
@@ -613,7 +611,7 @@ class _MatchPageState extends State<MatchPage> {
           //showNoMoreMatchPage()
           if(widget.user.membership.compareTo("premium")==0){
             setState(() {
-              nomorematches = true;
+              currentIndex = 0;
             });
           }
           else{
