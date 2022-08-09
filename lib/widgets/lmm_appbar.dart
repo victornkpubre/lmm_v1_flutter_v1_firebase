@@ -28,7 +28,7 @@ class _LmmAppBarState extends State<LmmAppBar> {
   @override
   void initState() {
     loadData();
-    _timer();
+    //_timer();
 
     super.initState();
   }
@@ -45,7 +45,7 @@ class _LmmAppBarState extends State<LmmAppBar> {
         });
       }
     });
-  setState(() {
+    setState(() {
       unreadMessages = cnt;
     });
   }

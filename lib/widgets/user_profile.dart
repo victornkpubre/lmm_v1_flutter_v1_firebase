@@ -31,7 +31,8 @@ class UserProfile extends StatefulWidget {
         type: MaterialType.transparency,
         child: Container(
                   width: size.width*0.75,
-                  height: size.height*0.75,
+                  constraints: BoxConstraints(minHeight: size.height*0.75),
+                  //height: size.height*0.75,
                   color: Colors.black,
 
                   child: Column(
@@ -43,7 +44,7 @@ class UserProfile extends StatefulWidget {
                           crossAxisAlignment: CrossAxisAlignment.center,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Text(widget.user.codename, style: TextStyle(color: LmmColors.lmmGold, fontFamily: "Cinzel Black", fontSize: size.height*0.1),),
+                            Text(widget.user.codename, style: TextStyle(color: LmmColors.lmmGold, fontFamily: "Cinzel Black", fontSize: size.height*0.07),),
                           ],
                         ),
                       ),
@@ -137,34 +138,54 @@ class UserProfile extends StatefulWidget {
 
                       Container(
                         width: size.width*0.6,
-                        child: Text(widget.user.summary, style: detailTextStyle),
+                        child: widget.user.summary!=null?
+                        Text(widget.user.summary, style: detailTextStyle):
+                        Container(),
                       ),
                       
                       Divider(color: Colors.transparent, height: size.height*0.01,),
-
-                      
                       
                       Container(
                         padding: EdgeInsets.fromLTRB(15,5,15,5),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Text(widget.user.location, style: detailTextStyle,),
+                            widget.user.location!=null?
+                            Text(widget.user.location, style: detailTextStyle,):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
-                            Text("${dobToAge(widget.user.dob)}", style: detailTextStyle),
+
+                            widget.user.dob!=null?
+                            Text("${dobToAge(widget.user.dob)}", style: detailTextStyle):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
-                            Text(religionToText(widget.user.religion), style: detailTextStyle),
+
+                            widget.user.religion!=null?
+                            Text(religionToText(widget.user.religion), style: detailTextStyle):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
-                            Text(widget.user.genotype.toUpperCase(), style: detailTextStyle),
+
+                            widget.user.genotype!=null?
+                            Text(widget.user.genotype.toUpperCase(), style: detailTextStyle):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
-                            Text(widget.user.education, style: detailTextStyle),
+
+                            widget.user.education!=null?
+                            Text(widget.user.education, style: detailTextStyle):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
-                            Text(widget.user.stateOfOrigin, style: detailTextStyle),
+
+                            widget.user.stateOfOrigin!=null?
+                            Text(widget.user.stateOfOrigin, style: detailTextStyle):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
+
+                            widget.user.carrer!=null?
                             Container(
                               width: size.width*0.6,
                               child: Text(widget.user.carrer, style: detailTextStyle),
-                            ),
+                            ):
+                            Container(),
                             Divider(color: Colors.transparent, height: size.height*0.005,),
                           ],
                         ),

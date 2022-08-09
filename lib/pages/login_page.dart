@@ -33,6 +33,7 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   String state = "login";
   String error_message;
+  bool login_failed = false;
   TextEditingController adminController = TextEditingController();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
@@ -197,25 +198,47 @@ class _LoginPageState extends State<LoginPage> {
                             showLoading('Loading User');
                             User user = await login(emailController.text, passwordController.text);
                             if(user != null){
-                              closeLoginLoading(true);
+                              print(user.email);
+                              print(user.password);
                               widget.user.uid = user.uid;
                               widget.user.email = user.email;
                               widget.user.password = user.password;
 
                               //getUser details
                               String jsonStr = await FirebaseRealtimeDatabaseManager().readByUid("user", widget.user.uid);
-                              widget.user = User.fromJson(json.decode(jsonStr));
+                              print("jsonStr is : $jsonStr");
+                              if(jsonStr == null){
+                                print("jsonStr is null");
+                                //Toast
+                                Fluttertoast.showToast(
+                                  msg: "User not found. Try Signing Up",
+                                  toastLength: Toast.LENGTH_SHORT,
+                                  gravity: ToastGravity.CENTER,
+                                  timeInSecForIosWeb: 1,
+                                  backgroundColor: LmmColors.lmmGrey,
+                                  textColor: Colors.white,
+                                  fontSize: 16.0
+                                );
 
-                              //login locally
-                              LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
+                              }
+                              else{
 
-                              Navigator.of(context).popUntil((route) => route.isFirst);
+                                closeLoginLoading(true);
 
-                              //Navigate to MatchPage with user
-                              Navigator.pushReplacement(
-                                context,
-                                MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
-                              );
+                                widget.user = User.fromJson(json.decode(jsonStr));
+
+                                //login locally
+                                LmmSharedPreferenceManager().loginUser(user.email, user.password, user.uid);
+
+                                Navigator.of(context).popUntil((route) => route.isFirst);
+
+                                //Navigate to MatchPage with user
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => MatchPage(user: widget.user,)),
+                                );
+                              }
+                              
                               
                             }
                             else{
@@ -362,6 +385,8 @@ class _LoginPageState extends State<LoginPage> {
                 ],
               ),
 
+              
+
               Row(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -371,7 +396,130 @@ class _LoginPageState extends State<LoginPage> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: <Widget>[
 
-                      Divider(color: Colors.transparent),
+                      Divider(color: Colors.transparent, height: 7,),
+
+                      login_failed==true?
+                      InkWell(
+                        child: Text("Reset Password", style: TextStyle(color: Colors.white, fontSize: 18, fontFamily: "Times New Roman")),
+                        onTap: (){
+                          if(emailController.text!=null){
+                            FirebaseAuth.instance.sendPasswordResetEmail(email: emailController.text);
+                          }
+
+                          //Show Reset Password Dialog
+                          showDialog(
+                            context: context,
+                            builder: (context){
+                              return Material( 
+                                color: Colors.transparent,
+                                child: Container(
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: AssetImage('assets/images/goldGradient.png'),
+                                    fit: BoxFit.fill
+                                  ),
+                                  borderRadius: BorderRadius.all(Radius.circular(25))
+                                ),
+                                //height: size.height*0.45,
+                                //width: size.width*0.75,
+
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        image: DecorationImage(
+                                          image: AssetImage('assets/images/greyGradient.png'),
+                                          fit: BoxFit.fill
+                                        ),
+                                        borderRadius: BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25))
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.max,
+                                        children: <Widget>[
+
+                                          Container(
+                                            height: 50,
+                                            width: 50,
+                                            decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                image: AssetImage('assets/images/logo.png'),
+                                                fit: BoxFit.fill
+                                              ),
+                                            ),
+                                          )
+
+                                        ]
+                                      ),
+                                    ),
+
+                                    Divider(color: Colors.transparent),
+
+                                    Column(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+
+                                                Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Text("Congratulation!", style: TextStyle(color: Colors.black54, fontSize: size.width*0.055, fontFamily: "Calisto"),),
+                                                ),
+
+                                                Divider(color: Colors.transparent),
+
+                                                Container(
+                                                  padding: EdgeInsets.all(10),
+                                                  child: Text("A Reset Password Email has been sent to the email above", 
+                                                    textAlign: TextAlign.center, 
+                                                    style: TextStyle(color: Colors.black54, fontSize: size.width*0.045, fontFamily: "Calisto"), 
+                                                  ),
+                                                ),
+
+                                                Divider(color: Colors.transparent),
+
+                                              ],
+                                            ),
+
+                                            Container(
+                                            height: 3,
+                                            width: size.width*0.6,
+                                            decoration: BoxDecoration(
+                                              image: DecorationImage(
+                                                image: AssetImage('assets/images/divider.png'),
+                                                fit: BoxFit.fill
+                                              ),
+                                            ),
+                                          ),
+
+                                          InkWell(
+                                            child: Row(
+                                              mainAxisAlignment: MainAxisAlignment.center,
+                                              children: <Widget>[
+
+                                                Container(
+                                                  padding: EdgeInsets.all(15),
+                                                  child: Text("Okay", style: TextStyle(fontSize: 18, color: Colors.black54, fontFamily: "Times New Roman"),),
+                                                )
+
+                                              ],
+                                            ),
+                                            onTap: (){
+
+                                              Navigator.pop(context);
+                                              
+                                            },
+                                          )
+                                  ],
+                                ),
+                              ));
+
+                            }
+                          );
+
+                        },             
+                      ):
+                      Container(),
                       Divider(color: Colors.transparent),
 
                       //Facebook Button
@@ -397,7 +545,6 @@ class _LoginPageState extends State<LoginPage> {
                                 height: 30,
                                 width: 30,
                               ),
-                              //VerticalDivider(color: Colors.transparent),
                               Container(
                                 child: Text("Login with Facebook", style: TextStyle(fontFamily: "Times New Roman", color: Colors.white),),
                               )
@@ -841,9 +988,10 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.pop(context);
     setState(() {
       if(successful){
-        showLoading('Login Up Successful');
+        showLoading('Login Successful');
       }else{
-        showLoading('Login Up Failed');
+        showLoading('Login Failed');
+        login_failed = true;
       }
     });
   

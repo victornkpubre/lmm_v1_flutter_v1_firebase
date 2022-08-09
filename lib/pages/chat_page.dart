@@ -249,12 +249,11 @@ class _ChatPageState extends State<ChatPage> {
                             await sendNotification(textMessage, widget.messenger.uid);
 
                             textMessage.status = "read";
-                            await LmmSharedPreferenceManager().addMessageByUid(textMessage, widget.messenger.uid);
-
                             setState(() {
                               widget.messages.add(textMessage);
                               scrollMessages();
                             });
+                            await LmmSharedPreferenceManager().addMessageByUid(textMessage, widget.messenger.uid);
 
                             widget.callBackFunction(widget.messages);
 

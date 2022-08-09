@@ -11,8 +11,9 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   Color primaryColor = Colors.black;
   Color statusBarColor = LmmColors.lmmGold;
-  TextStyle  inputHintStyle = TextStyle(color: Colors.grey, fontFamily: 'Corsiva');
-  
+  TextStyle inputHintStyle =
+      TextStyle(color: Colors.grey, fontFamily: 'Corsiva');
+
   @override
   Widget build(BuildContext context) {
     FlutterStatusbarcolor.setStatusBarColor(statusBarColor);
@@ -21,12 +22,11 @@ class MyApp extends StatelessWidget {
       DeviceOrientation.portraitDown,
     ]);
     return MaterialApp(
-      title: 'NBB',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: primaryColor,
-      ),
-      home: SplashScreen()
-    );
+        title: 'LMM',
+        debugShowCheckedModeBanner: false,
+        theme: ThemeData(
+          primaryColor: primaryColor,
+        ),
+        home: SplashScreen());
   }
 }

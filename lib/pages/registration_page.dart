@@ -24,13 +24,10 @@ import 'package:lagos_match_maker/widgets/lmm_bottombar.dart';
 import 'package:random_string/random_string.dart';
 import 'dart:math' show Random;
 
-
 class RegistrationPage extends StatefulWidget {
   User user;
 
-  RegistrationPage({
-    @required this.user
-  });
+  RegistrationPage({@required this.user});
 
   @override
   _RegistrationPageState createState() => _RegistrationPageState();
@@ -46,184 +43,199 @@ class _RegistrationPageState extends State<RegistrationPage> {
   Widget initDialog;
   double dialogScreenHeight;
 
-
   //Animation Variables
   AnimatorKey animatorKey = AnimatorKey<double>();
-  
+
+  List<String> codeNames = [];
 
   @override
   void initState() {
     // dialogs = loadDialog();
+    loadData();
     super.initState();
   }
 
-  // List<Widget> loadDialog(){
-  //   List<Widget> temp = [];
-  //   for (var i = 0; i < 11; i++) {
-  //     currentStage = i;
-  //     nextDialog();
-  //     temp.add(currentDialog);
-  //   }
-  //   currentStage = 0;
-  //   currentDialog = null;
-  // }
-
+  loadData(){
+    //codeNames = FirebaseRealtimeDatabaseManager().readAtrributebyUid(table, attribute, uid)
+  }
 
   @override
   Widget build(BuildContext context) {
-
     size = MediaQuery.of(context).size;
 
-    dialogScreenHeight = size.height*0.6;
+    dialogScreenHeight = size.height * 0.6;
 
-    initDialog = GenderDialog(width: size.width*0.7, resultCallBack: (result){genderCallBackFunction(result);});
+    initDialog = GenderDialog(
+        width: size.width * 0.7,
+        resultCallBack: (result) {
+          genderCallBackFunction(result);
+        });
 
     return Container(
       color: Colors.black,
-
       child: Scaffold(
         resizeToAvoidBottomInset: false,
-
-        // appBar: AppBar(
-        //   centerTitle: true,
-        //   backgroundColor: Colors.black,
-        //   elevation: 0,
-        //   title: LmmAppBar(),
-        // ),
-
         bottomSheet: LmmBottomBar(),
-
         body: Container(
           color: Colors.black,
-
-          child: Column(
-            
-            children: <Widget>[
-
-              SizedBox(
-                height: size.height*0.1,
-              ),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: <Widget>[
-                  InkWell(
-                    child: Container(
-                      padding: EdgeInsets.all(10),
-                      child: Icon(Icons.arrow_back_ios, color: LmmColors.lmmGold),
+          child: codeNames.isEmpty
+              ? CircularProgressIndicator()
+              : Column(
+                  children: <Widget>[
+                    SizedBox(
+                      height: size.height * 0.1,
                     ),
-                    onTap: (){
-                      if(currentStage != 0){
-                        setState(() {
-                          --currentStage;
-                          nextDialog();
-                        });
-                      }
-                    },
-                  )
-                ],
-              ),
-
-              Divider(color: Colors.transparent),
-
-              SizedBox(
-                height: dialogScreenHeight,
-                width: size.width,
-                child: submitting?
-                Center(
-                  child: CircularProgressIndicator(backgroundColor: LmmColors.lmmGold),
-                ):
-                Center(
-                  child: Animator<double>(
-                    animatorKey: animatorKey,
-                    tween: Tween<double>(begin: 1, end: 0),
-                    duration: Duration(milliseconds: 200),
-                    builder: (context, animatorState, child ) => Center(
-                      child: Opacity(
-                        opacity: animatorState.value,
-                        child: currentDialog == null? initDialog: currentDialog
-                      )
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: <Widget>[
+                        InkWell(
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            child: Icon(Icons.arrow_back_ios,
+                                color: LmmColors.lmmGold),
+                          ),
+                          onTap: () {
+                            if (currentStage != 0) {
+                              setState(() {
+                                --currentStage;
+                                nextDialog();
+                              });
+                            }
+                          },
+                        )
+                      ],
                     ),
-                    endAnimationListener: (animatorState){
-                      //case - start next animation - change currentDialog based on states and currentStage
-                      nextDialog();
-                    },
-                  )
-                )
-
-              ),
-
-
-            ],
-          ),
-
+                    Divider(color: Colors.transparent),
+                    SizedBox(
+                        height: dialogScreenHeight,
+                        width: size.width,
+                        child: submitting
+                            ? Center(
+                                child: CircularProgressIndicator(
+                                    backgroundColor: LmmColors.lmmGold),
+                              )
+                            : Center(
+                                child: Animator<double>(
+                                animatorKey: animatorKey,
+                                tween: Tween<double>(begin: 1, end: 0),
+                                duration: Duration(milliseconds: 200),
+                                builder: (context, animatorState, child) =>
+                                    Center(
+                                        child: Opacity(
+                                            opacity: animatorState.value,
+                                            child: currentDialog == null
+                                                ? initDialog
+                                                : currentDialog)),
+                                endAnimationListener: (animatorState) {
+                                  //case - start next animation - change currentDialog based on states and currentStage
+                                  nextDialog();
+                                },
+                              ))),
+                  ],
+                ),
         ),
-        
-
       ),
-      
     );
   }
 
-
-
-  nextDialog(){
+  nextDialog() {
     //change currentDialog based on states and currentStage
     //Fade In - reverse
     switch (currentStage) {
       case 0:
-        currentDialog = GenderDialog(width: size.width*0.7, resultCallBack: (result){genderCallBackFunction(result);});
+        currentDialog = GenderDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              genderCallBackFunction(result);
+            });
         break;
       case 1:
-        currentDialog = MaritalStatusDialog(width: size.width*0.7, resultCallBack: (result){maritalStatusCallBackFunction(result);});
+        currentDialog = MaritalStatusDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              maritalStatusCallBackFunction(result);
+            });
         break;
       case 2:
-        currentDialog = GenotypeDialog(width: size.width*0.7, resultCallBack: (result){genotypeCallBackFunction(result);});
+        currentDialog = GenotypeDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              genotypeCallBackFunction(result);
+            });
         break;
       case 3:
-        currentDialog = ReligionDialog(width: size.width*0.7, resultCallBack: (result){religionCallBackFunction(result);});
+        currentDialog = ReligionDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              religionCallBackFunction(result);
+            });
         break;
       case 4:
-        currentDialog = StateOfOriginDialog(width: size.width*0.7, resultCallBack: (result){stateOfOriginCallBackFunction(result);});
+        currentDialog = StateOfOriginDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              stateOfOriginCallBackFunction(result);
+            });
         break;
       case 5:
-        currentDialog = DateOfBirthDialog(width: size.width*0.7, resultCallBack: (result){dobCallBackFunction(result);});
+        currentDialog = DateOfBirthDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              dobCallBackFunction(result);
+            });
         break;
       case 6:
-        currentDialog = LocationDialog(width: size.width*0.7, resultCallBack: (result){locationCallBackFunction(result);});
+        currentDialog = LocationDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              locationCallBackFunction(result);
+            });
         break;
       case 7:
-        currentDialog = PhoneNumberDialog(width: size.width*0.7, resultCallBack: (result){phoneCallBackFunction(result);});
+        currentDialog = PhoneNumberDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              phoneCallBackFunction(result);
+            });
         break;
       case 8:
-        currentDialog = CareerDialog(width: size.width*0.7, resultCallBack: (result){careerCallBackFunction(result);});
+        currentDialog = CareerDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              careerCallBackFunction(result);
+            });
         break;
       case 9:
-        currentDialog = EducationDialog(width: size.width*0.7, resultCallBack: (result){educationCallBackFunction(result);});
+        currentDialog = EducationDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              educationCallBackFunction(result);
+            });
         break;
       case 10:
-        currentDialog = SummaryDialog(width: size.width*0.7, resultCallBack: (result){summaryCallBackFunction(result);});
+        currentDialog = SummaryDialog(
+            width: size.width * 0.7,
+            resultCallBack: (result) {
+              summaryCallBackFunction(result);
+            });
         break;
       default:
     }
 
     animatorKey.controller.reverse();
-
   }
 
-
   //Functions
-  genderCallBackFunction(String gender){
+  genderCallBackFunction(String gender) {
     widget.user.sex = gender;
     currentStage = 1;
     //Fade Out GenderDialog
     animatorKey.triggerAnimation();
 
     print(widget.user.sex);
-
   }
 
-  maritalStatusCallBackFunction(String status){
+  maritalStatusCallBackFunction(String status) {
     widget.user.maritalStatus = status;
     currentStage = 2;
 
@@ -233,7 +245,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.maritalStatus);
   }
 
-  genotypeCallBackFunction(String type){
+  genotypeCallBackFunction(String type) {
     widget.user.genotype = type;
     currentStage = 3;
 
@@ -243,8 +255,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.genotype);
   }
 
-
-  religionCallBackFunction(String result){
+  religionCallBackFunction(String result) {
     widget.user.religion = result;
     currentStage = 4;
 
@@ -254,8 +265,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.religion);
   }
 
-
-  stateOfOriginCallBackFunction(String state){
+  stateOfOriginCallBackFunction(String state) {
     widget.user.stateOfOrigin = state;
     currentStage = 5;
 
@@ -265,8 +275,9 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.stateOfOrigin);
   }
 
-  dobCallBackFunction(DateTime date){
-    widget.user.dob = DateStringWrapper.withDate(date).convertToJsonString(date);
+  dobCallBackFunction(DateTime date) {
+    widget.user.dob =
+        DateStringWrapper.withDate(date).convertToJsonString(date);
     currentStage = 6;
 
     //Fade Out GenderDialog
@@ -274,9 +285,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
     print(widget.user.dob);
   }
-  
 
-  locationCallBackFunction(String state){
+  locationCallBackFunction(String state) {
     widget.user.location = state;
     currentStage = 7;
 
@@ -286,8 +296,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.location);
   }
 
-
-  phoneCallBackFunction(String number){
+  phoneCallBackFunction(String number) {
     widget.user.phoneNumber = number;
     currentStage = 8;
 
@@ -297,8 +306,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.phoneNumber);
   }
 
-
-  careerCallBackFunction(String text){
+  careerCallBackFunction(String text) {
     widget.user.carrer = text;
     currentStage = 9;
 
@@ -308,8 +316,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.carrer);
   }
 
-
-  educationCallBackFunction(String text){
+  educationCallBackFunction(String text) {
     widget.user.education = text;
     currentStage = 10;
 
@@ -319,10 +326,8 @@ class _RegistrationPageState extends State<RegistrationPage> {
     print(widget.user.education);
   }
 
-
   summaryCallBackFunction(String text) async {
-    if(!submitting){
-
+    if (!submitting) {
       setState(() {
         submitting = true;
       });
@@ -331,19 +336,19 @@ class _RegistrationPageState extends State<RegistrationPage> {
       currentStage = 11;
 
       //Fade Out GenderDialog
-      animatorKey.triggerAnimation();
+      //animatorKey.triggerAnimation();
 
-      print(widget.user.summary);
+      //print(widget.user.summary);
 
       widget.user.matches = [];
       widget.user.codename = await generateCodeName();
 
       //login locally
-      LmmSharedPreferenceManager().loginUser(widget.user.email, widget.user.password, widget.user.uid);
+      LmmSharedPreferenceManager()
+          .loginUser(widget.user.email, widget.user.password, widget.user.uid);
 
-      
-      //End of Basic Registration 
-      if(widget.user.membership.compareTo("basic")==0){
+      //End of Basic Registration
+      if (widget.user.membership.compareTo("basic") == 0) {
         //Upload Basic User to Database
         String jsonInput = json.encode(widget.user);
         FirebaseRealtimeDatabaseManager().createWithUid(jsonInput, "user");
@@ -351,21 +356,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
         //Navigate
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => BasicCongratsPage(user: widget.user,)),
+          MaterialPageRoute(
+              builder: (context) => BasicCongratsPage(
+                    user: widget.user,
+                  )),
         );
-
-      }else{
-
+      } else {
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => PremiumRegistrationPage(user: widget.user)),
+          MaterialPageRoute(
+              builder: (context) => PremiumRegistrationPage(user: widget.user)),
         );
-
       }
     }
-
   }
-
 
   Future<String> generateCodeName() async {
     bool success = false;
@@ -375,10 +379,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
     //get list of codenames
     list = await getCodeNames();
 
-    while(!success){
-      codename = "${randomAlpha(2)}${randomBetween(10,1000)}";
+    while (!success) {
+      codename = "${randomAlpha(2)}${randomBetween(10, 1000)}";
       print(codename);
-      if(!isTaken(list, codename)){
+      if (!isTaken(list, codename)) {
         success = true;
       }
     }
@@ -387,35 +391,30 @@ class _RegistrationPageState extends State<RegistrationPage> {
   }
 
   Future<List<String>> getCodeNames() async {
-    if(await FirebaseRealtimeDatabaseManager().tableExists("user")){
-      List<dynamic> users =  json.decode(await FirebaseRealtimeDatabaseManager().readAll("user"));
+    if (await FirebaseRealtimeDatabaseManager().tableExists("user")) {
+      List<dynamic> users =
+          json.decode(await FirebaseRealtimeDatabaseManager().readAll("user"));
       List<String> names = [];
+
+      //FirebaseRealtimeDatabaseManager()..readByAttrWithId(table, attribute, attribute_value)
 
       users.forEach((element) {
         User user = User.fromJson(element);
         names.add(user.codename);
       });
       return names;
-    }
-    else{
-
+    } else {
       return [];
-
     }
   }
 
-  bool isTaken(List list, String name){
+  bool isTaken(List list, String name) {
     bool result = false;
     list.forEach((element) {
-      if((element as String).compareTo(name) == 0){
+      if ((element as String).compareTo(name) == 0) {
         result = true;
       }
     });
     return result;
   }
-
-
-
-
-
 }

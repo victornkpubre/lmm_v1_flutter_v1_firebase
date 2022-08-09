@@ -107,6 +107,7 @@ class _MessagesPageState extends State<MessagesPage> {
                     //A Message
                     return InkWell(
                       child: Container(
+                        margin: EdgeInsets.fromLTRB(0,0,0,5),
                         decoration: BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/images/goldGradient.png'),

@@ -77,8 +77,9 @@ class _SuccessfulDialogState extends State<SuccessfulDialog> {
               InkWell(
                 child: Text("Later", style: TextStyle(fontSize: 30, fontFamily: "Calisto", color: LmmColors.lmmBlack),),
                 onTap: (){
-                    addMatch(widget.match.uid);
-                    Navigator.of(context).pop();
+                  Navigator.of(context).pop();
+                  addMatch(widget.match.uid);
+                    
                 },
               ),
 

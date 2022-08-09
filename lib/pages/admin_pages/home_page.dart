@@ -299,6 +299,11 @@ class _AdminHomePageState extends State<AdminHomePage> {
                                   children: [
 
                                     Container(
+                                      padding: EdgeInsets.fromLTRB(10,0,0,0),
+                                      child: Text("#${index + 1}", style: TextStyle(fontSize: 20, fontFamily: "Times New Roman")),
+                                    ),
+
+                                    Container(
                                       margin: EdgeInsets.fromLTRB(10,0,0,0),
                                       child: isUnverifiedPremium(users[index].uid)?
                                         Text("Premium\n(unverified)", style: TextStyle(fontSize: 20, fontFamily: "Arial Black")):
